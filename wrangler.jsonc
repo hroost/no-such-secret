@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "no-such-secret",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-17",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "SECRETS", "class_name": "SecretObject" }]
+  },
+  "r2_buckets": [{ "binding": "PAYLOADS", "bucket_name": "no-such-secret-payloads" }],
+  "ratelimits": [{
+    "name": "RATE_LIMITER",
+    "namespace_id": "1001",
+    "simple": { "limit": 30, "period": 60 }
+  }],
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SecretObject"] }],
+  "vars": {
+    "APP_NAME": "NoSuchSecret",
+    "MAX_PLAINTEXT_BYTES": "10485760",
+    "DEFAULT_TTL_SECONDS": "86400",
+    "ALLOWED_TTL_SECONDS": "3600,86400,259200,604800",
+    "PUBLIC_BASE_URL": "https://share.example.com"
+  }
+}
