@@ -2,6 +2,9 @@
 
 **Share it once. Then it never existed.**
 
+[![CI](https://github.com/hroost/no-such-secret/actions/workflows/ci.yml/badge.svg)](https://github.com/hroost/no-such-secret/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 NoSuchSecret is a small, MIT-licensed Cloudflare application for one-time sharing of text and files (up to 10 MiB). It is meant to be deployed independently by one organization or individual; it is not a hosted service and sends no analytics or telemetry to the project.
 
 ## Security model
@@ -33,6 +36,19 @@ This protects stored secrets from normal service operation. It cannot protect a 
 
 No D1, KV, dashboard, history, local secret persistence, service worker, or telemetry is included.
 
+```mermaid
+flowchart LR
+  S[Sender browser] -->|encrypts locally| W[Cloudflare Worker]
+  W -->|state and claim verifier| D[Durable Object]
+  W -->|ciphertext only| R[(Private R2)]
+  S -->|URL with key in fragment| C[Recipient browser]
+  C -->|claim over POST| W
+  W -->|one atomic reveal| C
+  C -->|decrypts locally| C
+```
+
+The Worker sees the claim during reveal, but never receives the fragment or AES key. See the [threat model](docs/THREAT_MODEL.md) for trust boundaries, guarantees, and non-goals.
+
 ## Local development
 
 Prerequisites: Node 22+, pnpm 11, and a Cloudflare account for a full integration deployment.
@@ -49,14 +65,14 @@ pnpm test
 
 ## Deployment
 
-1. Create a private R2 bucket: `npx wrangler r2 bucket create no-such-secret-payloads`.
+1. Create a private R2 bucket: `pnpm exec wrangler r2 bucket create no-such-secret-payloads`.
 2. Update the `r2_buckets` bucket name in `wrangler.jsonc` if needed; keep the bucket private.
 3. Create a Cloudflare Access application for `share.example.com` (or your own hostname). Configure Access policies for `/`, `/share*`, `/request*`, `/internal/*`, and `/api/internal/*`; explicitly exclude `/public/*` and `/api/public/*`.
 4. Set the Worker secrets/variables from the Access application:
 
    ```bash
-   npx wrangler secret put CF_ACCESS_AUD
-   npx wrangler secret put CF_ACCESS_TEAM_DOMAIN
+   pnpm exec wrangler secret put CF_ACCESS_AUD
+   pnpm exec wrangler secret put CF_ACCESS_TEAM_DOMAIN
    ```
 
    `CF_ACCESS_TEAM_DOMAIN` is the full `https://your-team.cloudflareaccess.com` issuer. The Worker validates signature, issuer, audience, and expiry against its rotating JWKS.
@@ -66,7 +82,20 @@ pnpm test
 
 Use separate Worker, Durable Object, R2, Access application, rate-limit namespace, hostname, and secrets for every deployment environment. A personal deployment uses an Access policy allowing only its owner; the source and public-link behavior remain the same.
 
-The Durable Object `v1` migration establishes SQLite-backed object state. Treat future migrations as forward-only: test `wrangler deploy --dry-run` in an isolated environment before production and never use a class-deletion migration for a live deployment.
+The Durable Object `v1` migration establishes SQLite-backed object state. Treat future migrations as forward-only: run `pnpm run deploy:dry-run` in an isolated environment before production and never use a class-deletion migration for a live deployment.
+
+### Post-deploy verification
+
+Use disposable test values only; never paste a real credential into an unverified deployment.
+
+- Confirm `/`, `/internal/*`, and `/api/internal/*` reject a signed-out browser, while `/public/*` remains reachable without Access.
+- Create one internal and one external share. Reload each recipient page before revealing to confirm that `GET` and status checks do not consume it.
+- Reveal each share once and confirm the next reveal returns unavailable. Repeat the same checks for internal and external requests.
+- Submit twice to one request and confirm only the first submission succeeds.
+- Inspect responses for `Cache-Control: no-store`, a restrictive CSP, `Referrer-Policy: no-referrer`, and `X-Robots-Tag: noindex`.
+- Confirm the R2 bucket has no public endpoint, logs contain no bodies, fragment keys, claims, or plaintext, and expired/consumed objects are removed.
+
+The [operations runbook](docs/OPERATIONS.md) covers monitoring, incidents, rollback constraints, and teardown.
 
 ## Operational notes
 
@@ -77,8 +106,16 @@ The Durable Object `v1` migration establishes SQLite-backed object state. Treat 
 
 ## Development and testing
 
-`pnpm run check`, `pnpm run lint`, and `pnpm test` exercise strict typing, linting, crypto round trips/tamper detection, fragment rejection, and lifecycle transitions. Before release, run the integration and browser tests against a non-production Access configuration and test both organization and personal deployment profiles.
+`pnpm run check`, `pnpm run lint`, and `pnpm test` exercise strict typing, linting, crypto round trips/tamper detection, fragment rejection, lifecycle transitions, authentication boundaries, real Worker routing, Durable Object concurrency, and R2 cleanup. The integration tests run locally in Cloudflare's Workers runtime; no account or production data is used.
+
+Before a release, also complete the post-deploy checklist in an isolated environment and manually test the supported browsers. CI runs type checking, linting, all tests, a production build, a Wrangler dry run, a production dependency audit, dependency review on pull requests, and secret scanning.
+
+Security reports belong in [GitHub's private vulnerability reporting channel](https://github.com/hroost/no-such-secret/security/advisories/new), not a public issue. See [SECURITY.md](SECURITY.md).
 
 ## License
 
 [MIT](LICENSE).
+
+## Development disclosure
+
+AI-assisted tools were used during development of this project, including for code generation and review. Changes were reviewed and tested by the maintainer. If your contribution or adoption policy excludes AI-assisted software, please take this into account.

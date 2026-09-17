@@ -13,10 +13,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "pnpm run test:unit && pnpm run test:integration",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
     "lint": "eslint .",
-    "deploy": "pnpm run build && wrangler deploy"
+    "deploy:dry-run": "pnpm run build && pnpm exec wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "deploy": "pnpm run build && pnpm exec wrangler deploy"
   },
   "dependencies": {
     "hono": "^4.10.5",
@@ -26,6 +29,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.19.0",
+    "@cloudflare/vitest-plugin": "^1.1.10",
     "@cloudflare/workers-types": "^5.20260917.1",
     "@eslint/js": "^9.36.0",
     "@types/node": "^24.7.0",
@@ -37,7 +41,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.44.1",
     "vite": "^7.1.7",
-    "vitest": "^5.0.1",
+    "vitest": "^4.1.11",
     "wrangler": "^4.40.2"
   }
 }

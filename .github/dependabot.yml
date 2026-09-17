@@ -3,6 +3,16 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
+    groups:
+      npm-dependencies:
+        patterns: ["*"]
+    ignore:
+      # The Cloudflare Vitest pool currently supports Vitest 4.x only.
+      - dependency-name: vitest
+        versions: [">=5.0.0"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    groups:
+      github-actions:
+        patterns: ["*"]
