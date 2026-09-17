@@ -107,7 +107,7 @@ export class SecretObject extends DurableObject<Env> {
     if (!bytesEqual(claimHash, decodeBase64Url(record.claimVerifier, 32))) return unavailable();
     record = consume(record);
     await this.ctx.storage.put(recordKey, record); // transition precedes any ciphertext read
-    let object: R2ObjectBody | null = null;
+    let object: R2ObjectBody | null;
     try { object = record.payloadObjectKey ? await this.env.PAYLOADS.get(record.payloadObjectKey) : null; } catch { return unavailable(); }
     if (!object) return unavailable();
     this.ctx.waitUntil(this.env.PAYLOADS.delete(record.payloadObjectKey!));
