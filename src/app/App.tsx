@@ -5,7 +5,7 @@ import { parseFragment } from "../crypto/fragment";
 import { asArrayBuffer, encodeBase64Url } from "../crypto/base64url";
 import { DEFAULT_TTL_SECONDS, MAX_PLAINTEXT_BYTES, TTL_OPTIONS } from "../shared/limits";
 import type { Audience, EncryptedMetadata, Mode } from "../shared/contracts";
-import { secretPath } from "../shared/routes";
+import { routeScope, secretPath } from "../shared/routes";
 import "./styles.css";
 
 type Content = { metadata: EncryptedMetadata; bytes: Uint8Array };
@@ -112,14 +112,14 @@ function CreateRequest() {
 function SubmitRequest({ audience, id }: { audience: Audience; id: string }) {
   const config = useConfig();
   const [kind, setKind] = useState<"text" | "file">("text"); const [text, setText] = useState(""); const [file, setFile] = useState<File | null>(null); const [error, setError] = useState(""); const [link, setLink] = useState(""); const [busy, setBusy] = useState(false); const [unavailable, setUnavailable] = useState(false);
-  useEffect(() => { void fetch(`/api/${audience}/requests/${id}/status`, { cache: "no-store", credentials: "same-origin" }).then(async (response) => { const value = await response.json().catch(() => null) as { status?: string } | null; setUnavailable(!response.ok || value?.status !== "open"); }).catch(() => setUnavailable(true)); }, [audience, id]);
+  useEffect(() => { void fetch(`/api/${routeScope(audience)}/requests/${id}/status`, { cache: "no-store", credentials: "same-origin" }).then(async (response) => { const value = await response.json().catch(() => null) as { status?: string } | null; setUnavailable(!response.ok || value?.status !== "open"); }).catch(() => setUnavailable(true)); }, [audience, id]);
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setError(""); let content: Content;
     if (kind === "text") content = { metadata: { kind: "text" }, bytes: new TextEncoder().encode(text) };
     else if (file) content = { metadata: { kind: "file", filename: file.name, mimeType: file.type || "application/octet-stream" }, bytes: new Uint8Array(await file.arrayBuffer()) };
     else { setError("Choose a file."); return; }
     if (!content.bytes.byteLength || content.bytes.byteLength > config.maxPlaintextBytes) { setError(`Use a non-empty secret no larger than ${sizeLabel(config.maxPlaintextBytes)}.`); return; }
-    setBusy(true); try { const encrypted = await encryptSecret(content.metadata, content.bytes); const response = await api(`/api/${audience}/requests/${id}/submit`, { method: "POST", body: JSON.stringify(encrypted.upload) }); if (!response.ok) throw new Error(); setLink(`${baseUrl(config)}/internal/request/${id}#${encrypted.fragment}`); } catch { setError("This secure request is no longer accepting submissions."); } finally { setBusy(false); }
+    setBusy(true); try { const encrypted = await encryptSecret(content.metadata, content.bytes); const response = await api(`/api/${routeScope(audience)}/requests/${id}/submit`, { method: "POST", body: JSON.stringify(encrypted.upload) }); if (!response.ok) throw new Error(); setLink(`${baseUrl(config)}/internal/request/${id}#${encrypted.fragment}`); } catch { setError("This secure request is no longer accepting submissions."); } finally { setBusy(false); }
   }
   if (link) return <LinkResult link={link} kind="submission" />;
   if (unavailable) return <Shell><section className="panel warning"><h1>Request unavailable</h1><p>This secure request is no longer accepting submissions.</p></section></Shell>;
@@ -133,7 +133,7 @@ function RevealedText({ value }: { value: string }) {
 
 function Reveal({ audience, mode, id }: { audience: Audience; mode: Mode; id: string }) {
   const [result, setResult] = useState<Content | null>(null); const [error, setError] = useState(""); const [busy, setBusy] = useState(false); const fragment = useMemo(() => { try { return parseFragment(location.hash); } catch { return null; } }, []);
-  async function reveal() { if (!fragment) { setError("This secure link is incomplete or invalid."); return; } setBusy(true); setError(""); try { const response = await api(`/api/${audience}/${mode}s/${id}/reveal`, { method: "POST", body: JSON.stringify({ claim: encodeBase64Url(fragment.claim) }) }); const nonce = response.headers.get("x-secret-nonce"); if (!response.ok || !nonce) throw new Error(); const content = await decryptSecret(fragment.key, nonce, new Uint8Array(await response.arrayBuffer())); setResult({ metadata: content.metadata, bytes: content.content }); } catch { setError("This secret is unavailable or could not be decrypted."); } finally { setBusy(false); } }
+  async function reveal() { if (!fragment) { setError("This secure link is incomplete or invalid."); return; } setBusy(true); setError(""); try { const response = await api(`/api/${routeScope(audience)}/${mode}s/${id}/reveal`, { method: "POST", body: JSON.stringify({ claim: encodeBase64Url(fragment.claim) }) }); const nonce = response.headers.get("x-secret-nonce"); if (!response.ok || !nonce) throw new Error(); const content = await decryptSecret(fragment.key, nonce, new Uint8Array(await response.arrayBuffer())); setResult({ metadata: content.metadata, bytes: content.content }); } catch { setError("This secret is unavailable or could not be decrypted."); } finally { setBusy(false); } }
   if (result) { if (result.metadata.kind === "file") { const blob = new Blob([asArrayBuffer(result.bytes)], { type: result.metadata.mimeType }); const href = URL.createObjectURL(blob); return <Shell><section className="panel success"><h1>Secret revealed</h1><p>The server-side secret is now consumed.</p><a className="button" href={href} download={safeFilename(result.metadata.filename)}>Download {safeFilename(result.metadata.filename)}</a></section></Shell>; } const value = new TextDecoder().decode(result.bytes); return <Shell><section className="panel success"><h1>Secret revealed</h1><p>The server-side secret is now consumed.</p><RevealedText value={value} /></section></Shell>; }
   return <Shell><section className="panel warning"><p className="eyebrow">ONE-TIME REVEAL</p><h1>Reveal secret</h1><p>This can only be done once. After revealing, it cannot be retrieved again.</p>{error && <p className="error">{error}</p>}<button onClick={() => void reveal()} disabled={busy}>{busy ? "Revealing…" : "Reveal secret"}</button></section></Shell>;
 }
@@ -147,7 +147,7 @@ export function App() {
   const hash = useSyncExternalStore(subscribeToHashChange, () => location.hash);
   const match = location.pathname.match(/^\/(internal|public)\/(share|request)\/([A-Za-z0-9_-]+)$/);
   if (!match) return location.pathname === "/share" ? <CreateShare /> : location.pathname === "/request" ? <CreateRequest /> : <Home />;
-  const audience = match[1] as Audience; const mode = match[2] as Mode; const id = match[3]!;
+  const audience: Audience = match[1] === "public" ? "external" : "internal"; const mode = match[2] as Mode; const id = match[3]!;
   return hash ? <Reveal key={hash} audience={audience} mode={mode} id={id} /> : mode === "request" ? <SubmitRequest audience={audience} id={id} /> : <Reveal audience={audience} mode={mode} id={id} />;
 }
 
