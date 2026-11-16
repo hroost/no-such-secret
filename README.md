@@ -15,6 +15,16 @@ Opening a link and checking its status are safe. An explicit **Reveal secret** b
 
 This protects stored secrets from normal service operation. It cannot protect a user from a malicious or compromised JavaScript deployment at the same origin, because that code can observe plaintext and fragment keys in the browser. Review and control your deployment pipeline accordingly.
 
+## Default limits
+
+- **Size:** up to **10 MiB (10,485,760 bytes)** of text or one file per secret, for both shares and request responses. Empty content is not accepted.
+- **Text:** measured in UTF-8 bytes, not characters. Emoji and other multibyte characters use more of the limit.
+- **Files:** any file type is accepted. Send one file per secret; ZIP multiple files together within the same size limit. Recipients download files after decryption.
+- **Expiry:** **24 hours** by default, with options for **1 hour, 24 hours, 3 days, or 7 days**. A request has the selected time to receive a response; submission starts a fresh expiry period for revealing it.
+- **One-time use:** each secret can be revealed once, and each request accepts one submission.
+
+Deployments can lower the size limit using `MAX_PLAINTEXT_BYTES`, but the code caps it at 10 MiB. `DEFAULT_TTL_SECONDS` and `ALLOWED_TTL_SECONDS` can select from the expiry options above. Forms show the configured size limit before upload.
+
 ## Flows
 
 | Action | Sender | Recipient | URL |

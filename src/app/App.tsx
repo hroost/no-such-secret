@@ -67,6 +67,12 @@ function Scope({ audience, onChange, action }: { audience: Audience; onChange: (
 
 function Expiry({ value, onChange }: { value: number; onChange: (value: number) => void }) { const config = useConfig(); return <label>Expires after<select value={value} onChange={(event) => onChange(Number(event.target.value))}>{config.allowedTtlSeconds.map((seconds) => <option key={seconds} value={seconds}>{labels[seconds] ?? `${seconds} seconds`}</option>)}</select></label>; }
 
+function ContentLimits({ kind }: { kind: "text" | "file" }) {
+  const config = useConfig();
+  const maximum = sizeLabel(config.maxPlaintextBytes);
+  return <p id="content-limits" className="hint">{kind === "file" ? `One file, up to ${maximum}. Any file type. ZIP multiple files together within this limit.` : `Up to ${maximum} of text, measured in UTF-8 bytes rather than characters.`}</p>;
+}
+
 export function LinkResult({ link, kind }: { link: string; kind: "share" | "request" | "submission" }) {
   const [copied, setCopied] = useState(false);
   const heading = kind === "request" ? "Send this request link" : kind === "share" ? "Send this secure link" : "Return this secure link";
@@ -97,7 +103,7 @@ function CreateShare() {
     } catch { setError("Unable to create the secure link. Please try again."); } finally { setBusy(false); }
   }
   if (link) return <LinkResult link={link} kind="share" />;
-  return <Shell><section className="panel"><p className="eyebrow">CREATE A SHARE</p><h1>Share a secret</h1><form onSubmit={submit}><Scope action="share" audience={audience} onChange={setAudience} /><fieldset><legend>Content</legend><label><input type="radio" checked={kind === "text"} onChange={() => setKind("text")} /> Text</label><label><input type="radio" checked={kind === "file"} onChange={() => setKind("file")} /> File</label>{kind === "text" ? <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Enter the secret…" maxLength={MAX_PLAINTEXT_BYTES} /> : <input type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />}</fieldset><Expiry value={ttl} onChange={setTtl} />{error && <p className="error">{error}</p>}<button disabled={busy}>{busy ? "Encrypting…" : "Create secure link"}</button></form></section></Shell>;
+  return <Shell><section className="panel"><p className="eyebrow">CREATE A SHARE</p><h1>Share a secret</h1><form onSubmit={submit}><Scope action="share" audience={audience} onChange={setAudience} /><fieldset><legend>Content</legend><label><input type="radio" checked={kind === "text"} onChange={() => setKind("text")} /> Text</label><label><input type="radio" checked={kind === "file"} onChange={() => setKind("file")} /> File</label><ContentLimits kind={kind} />{kind === "text" ? <textarea aria-describedby="content-limits" value={text} onChange={(event) => setText(event.target.value)} placeholder="Enter the secret…" maxLength={MAX_PLAINTEXT_BYTES} /> : <input type="file" aria-describedby="content-limits" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />}</fieldset><Expiry value={ttl} onChange={setTtl} />{error && <p className="error">{error}</p>}<button disabled={busy}>{busy ? "Encrypting…" : "Create secure link"}</button></form></section></Shell>;
 }
 
 function CreateRequest() {
@@ -123,7 +129,7 @@ function SubmitRequest({ audience, id }: { audience: Audience; id: string }) {
   }
   if (link) return <LinkResult link={link} kind="submission" />;
   if (unavailable) return <Shell><section className="panel warning"><h1>Request unavailable</h1><p>This secure request is no longer accepting submissions.</p></section></Shell>;
-  return <Shell><section className="panel"><p className="eyebrow">SECURE SUBMISSION</p><h1>Send a secret</h1><p>Your content is encrypted in this browser before it is sent.</p><form onSubmit={submit}><fieldset><legend>Content</legend><label><input type="radio" checked={kind === "text"} onChange={() => setKind("text")} /> Text</label><label><input type="radio" checked={kind === "file"} onChange={() => setKind("file")} /> File</label>{kind === "text" ? <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Enter the secret…" /> : <input type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />}</fieldset>{error && <p className="error">{error}</p>}<button disabled={busy}>{busy ? "Encrypting…" : "Send secure secret"}</button></form></section></Shell>;
+  return <Shell><section className="panel"><p className="eyebrow">SECURE SUBMISSION</p><h1>Send a secret</h1><p>Your content is encrypted in this browser before it is sent.</p><form onSubmit={submit}><fieldset><legend>Content</legend><label><input type="radio" checked={kind === "text"} onChange={() => setKind("text")} /> Text</label><label><input type="radio" checked={kind === "file"} onChange={() => setKind("file")} /> File</label><ContentLimits kind={kind} />{kind === "text" ? <textarea aria-describedby="content-limits" value={text} onChange={(event) => setText(event.target.value)} placeholder="Enter the secret…" /> : <input type="file" aria-describedby="content-limits" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />}</fieldset>{error && <p className="error">{error}</p>}<button disabled={busy}>{busy ? "Encrypting…" : "Send secure secret"}</button></form></section></Shell>;
 }
 
 function RevealedText({ value }: { value: string }) {
