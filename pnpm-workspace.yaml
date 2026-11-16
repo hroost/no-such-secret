@@ -2,7 +2,6 @@ allowBuilds:
   esbuild: true
   workerd: true
 minimumReleaseAgeExclude:
-  - '@cloudflare/workers-types@5.20260917.1'
   # Allow the upstream Minimatch security fix before the release-age delay expires.
   - '@typescript-eslint/eslint-plugin@8.73.0'
   - '@typescript-eslint/parser@8.73.0'
