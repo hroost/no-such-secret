@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       hono:
-        specifier: ^4.13.16
-        version: 4.13.16
+        specifier: ^4.13.18
+        version: 4.13.18
       jose:
         specifier: ^6.1.0
         version: 6.2.12
@@ -26,7 +26,7 @@ importers:
         version: 1.66.0(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5))(workerd@1.20261023.1)(wrangler@4.154.0(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5))
       '@cloudflare/vitest-plugin':
         specifier: ^1.4.9
-        version: 1.4.9(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)(vitest@4.1.12(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5)))
+        version: 1.4.9(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)(vitest@4.1.12(@types/node@24.13.5)(happy-dom@21.0.4)(vite@7.3.7(@types/node@24.13.5)))
       '@cloudflare/workers-types':
         specifier: ^5.20261023.1
         version: 5.20261023.1
@@ -51,6 +51,9 @@ importers:
       globals:
         specifier: ^16.4.0
         version: 16.5.0
+      happy-dom:
+        specifier: ^21.0.4
+        version: 21.0.4
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -62,7 +65,7 @@ importers:
         version: 7.3.7(@types/node@24.13.5)
       vitest:
         specifier: ^4.1.12
-        version: 4.1.12(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5))
+        version: 4.1.12(@types/node@24.13.5)(happy-dom@21.0.4)(vite@7.3.7(@types/node@24.13.5))
       wrangler:
         specifier: ^4.154.0
         version: 4.154.0(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)
@@ -816,6 +819,12 @@ packages:
   '@types/react@19.3.0':
     resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
 
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
+
   '@typescript-eslint/eslint-plugin@8.73.0':
     resolution: {integrity: sha512-UkygMFer53Yzn29MCYFTHf34hGXf5KJhiDWfIm1tXtXRrym1CS6l5H9Y3yCtPWChpC0/f93H88gdj8tN0dd4kw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -965,6 +974,10 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
+  buffer-image-size@0.6.4:
+    resolution: {integrity: sha512-nEh+kZOPY1w+gcCMobZ6ETUp9WfibndnosbpwB1iJk/8Gt5ZF2bhS6+B6bPYz424KtwsR6Rflc3tCz1/ghX2dQ==}
+    engines: {node: '>=4.0'}
+
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
@@ -1025,6 +1038,10 @@ packages:
 
   electron-to-chromium@1.5.430:
     resolution: {integrity: sha512-e1QEj72Y4zd8RlNZVmoTg+iCOSVwpk05IOiiQwdrkwCSVlZfPthevErhE+nckGd2YbsXfp1SkisznhGVIXP2NQ==}
+
+  entities@7.0.1:
+    resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
+    engines: {node: '>=0.12'}
 
   error-stack-parser-es@1.0.5:
     resolution: {integrity: sha512-5qucVt2XcuGMcEGgWI7i+yZpmpByQ8J1lHhcL7PwqCwu9FPP3VUXzT4ltHe5i2z9dePwEHcDVOAfSnHsOlCXRA==}
@@ -1153,12 +1170,16 @@ packages:
     resolution: {integrity: sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==}
     engines: {node: '>=18'}
 
+  happy-dom@21.0.4:
+    resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
+    engines: {node: '>=20.0.0'}
+
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.13.16:
-    resolution: {integrity: sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A==}
+  hono@4.13.18:
+    resolution: {integrity: sha512-H9q/E1XizaWstJxUW881dmLxEj+t/TrGGnyxINkm4+sK0qUwsMtFdo2BWI9Vs3cIS19MU6b6iCijoUoEf4f3DA==}
     engines: {node: '>=16.9.0'}
 
   ignore@5.3.2:
@@ -1536,6 +1557,10 @@ packages:
       jsdom:
         optional: true
 
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -1741,12 +1766,12 @@ snapshots:
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-plugin@1.4.9(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)(vitest@4.1.12(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5)))':
+  '@cloudflare/vitest-plugin@1.4.9(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)(vitest@4.1.12(@types/node@24.13.5)(happy-dom@21.0.4)(vite@7.3.7(@types/node@24.13.5)))':
     dependencies:
       cjs-module-lexer: 1.2.3
       esbuild: 0.28.2
       miniflare: 5.20261023.1-beta(@types/node@24.13.5)
-      vitest: 4.1.12(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5))
+      vitest: 4.1.12(@types/node@24.13.5)(happy-dom@21.0.4)(vite@7.3.7(@types/node@24.13.5))
       wrangler: 4.154.0(@cloudflare/workers-types@5.20261023.1)(@types/node@24.13.5)
       zod: 4.6.6
     transitivePeerDependencies:
@@ -2195,6 +2220,12 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  '@types/whatwg-mimetype@3.0.2': {}
+
+  '@types/ws@8.18.2':
+    dependencies:
+      '@types/node': 24.13.5
+
   '@typescript-eslint/eslint-plugin@8.73.0(@typescript-eslint/parser@8.73.0(eslint@9.39.5(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3))(eslint@9.39.5(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -2389,6 +2420,10 @@ snapshots:
       node-releases: 2.0.55
       update-browserslist-db: 1.3.3(browserslist@4.29.0)
 
+  buffer-image-size@0.6.4:
+    dependencies:
+      '@types/node': 24.13.5
+
   callsites@3.1.0: {}
 
   caniuse-lite@1.0.30001810: {}
@@ -2433,6 +2468,8 @@ snapshots:
   detect-libc@2.1.2: {}
 
   electron-to-chromium@1.5.430: {}
+
+  entities@7.0.1: {}
 
   error-stack-parser-es@1.0.5: {}
 
@@ -2584,9 +2621,22 @@ snapshots:
 
   globals@16.5.0: {}
 
+  happy-dom@21.0.4:
+    dependencies:
+      '@types/node': 24.13.5
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.2
+      buffer-image-size: 0.6.4
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.22.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   has-flag@4.0.0: {}
 
-  hono@4.13.16: {}
+  hono@4.13.18: {}
 
   ignore@5.3.2: {}
 
@@ -2895,7 +2945,7 @@ snapshots:
       '@types/node': 24.13.5
       fsevents: 2.3.3
 
-  vitest@4.1.12(@types/node@24.13.5)(vite@7.3.7(@types/node@24.13.5)):
+  vitest@4.1.12(@types/node@24.13.5)(happy-dom@21.0.4)(vite@7.3.7(@types/node@24.13.5)):
     dependencies:
       '@vitest/expect': 4.1.12
       '@vitest/mocker': 4.1.12(vite@7.3.7(@types/node@24.13.5))
@@ -2919,8 +2969,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.5
+      happy-dom: 21.0.4
     transitivePeerDependencies:
       - msw
+
+  whatwg-mimetype@3.0.0: {}
 
   which@2.0.2:
     dependencies:
